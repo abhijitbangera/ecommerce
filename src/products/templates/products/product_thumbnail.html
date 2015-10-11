@@ -1,0 +1,11 @@
+<div class="thumbnail text-center">
+        <h4><a href='{{product.get_absolute_url}}'>{{product.title}}</a><br/></h4>
+      {% if product.productimage_set.count > 0 %}
+          {% for img in product.productimage_set.all %}
+           <a href='{{product.get_absolute_url}}'><img class='img-responsive' src='{{img.image.url}}' /></a>
+          {% endfor %}
+       {% endif %} 
+      {% if price == "True" %}
+      	{{product.variation_set.first.get_html_price}}
+      {% endif %}
+</div>

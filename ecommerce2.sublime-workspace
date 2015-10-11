@@ -1,0 +1,753 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"objte",
+				"objects"
+			],
+			[
+				"Pro",
+				"Product"
+			],
+			[
+				"vari",
+				"variation-select"
+			],
+			[
+				"get",
+				"get_absolute_url"
+			],
+			[
+				"max",
+				"max_length"
+			],
+			[
+				"Pr",
+				"ProductListtView"
+			],
+			[
+				"pr",
+				"product_instance"
+			],
+			[
+				"ren",
+				"render_to_response"
+			],
+			[
+				"plan",
+				"plans_form"
+			],
+			[
+				"regi",
+				"register_member_form"
+			],
+			[
+				"BA",
+				"BASE_DIR"
+			],
+			[
+				"nex",
+				"next_url"
+			],
+			[
+				"re",
+				"return"
+			],
+			[
+				"login",
+				"login_required"
+			],
+			[
+				"vi",
+				"videos"
+			],
+			[
+				"p",
+				"print"
+			],
+			[
+				"api_",
+				"api_secret_key"
+			],
+			[
+				"updat",
+				"update_success"
+			],
+			[
+				"userf",
+				"user_profile"
+			],
+			[
+				"logi",
+				"login_required"
+			],
+			[
+				"logged",
+				"logged_in"
+			],
+			[
+				"in",
+				"input"
+			],
+			[
+				"Con",
+				"ContactForm"
+			],
+			[
+				"Si",
+				"SignUpAdmin"
+			],
+			[
+				"SignUp",
+				"SignUp"
+			],
+			[
+				"auto",
+				"auto_now_add"
+			],
+			[
+				"Job",
+				"JobAdmin"
+			],
+			[
+				"Add",
+				"AddressAdmin"
+			],
+			[
+				"suce",
+				"success_message"
+			],
+			[
+				"user",
+				"username_email"
+			],
+			[
+				"pas",
+				"password2"
+			],
+			[
+				"pass",
+				"password"
+			],
+			[
+				"clean",
+				"cleaned_data"
+			],
+			[
+				"clea",
+				"cleaned_data"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "src/products/models.py",
+			"settings":
+			{
+				"buffer_size": 2791,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/products/admin.py",
+			"settings":
+			{
+				"buffer_size": 249,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/products/urls_category.py",
+			"settings":
+			{
+				"buffer_size": 344,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/products/urls.py",
+			"settings":
+			{
+				"buffer_size": 658,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "from django.shortcuts import render,get_object_or_404, redirect\nfrom django.views.generic.detail import DetailView\nfrom django.views.generic.list import ListView\nfrom django.http import Http404\nfrom django.db.models import Q\nfrom .forms import VariationInventoryFormSet\nfrom django.contrib import messages\nfrom .mixins import StaffRequiredMixin,LoginRequiredMixin\n# Create your views here.\n\nfrom .models import Product, Variation,Category\n\nclass CategoryListView(ListView):\n	model=Category\n	queryset=Category.objects.all()\n	template_name=\"products/product_list.html\"\n\n\nclass VariationListView(StaffRequiredMixin,ListView):\n	model=Variation\n	queryset=Variation.objects.all()\n	def get_context_data(self,*args,**kwargs):\n		context=super(VariationListView,self).get_context_data(*args,**kwargs)\n		context['formset']=VariationInventoryFormSet(queryset=self.get_queryset())\n		return context\n	def get_queryset(self,*args,**kwargs):\n		product_pk=self.kwargs.get(\"pk\")\n		if product_pk:\n			product=get_object_or_404(Product,pk=product_pk)\n			queryset=Variation.objects.filter(product=product)\n		return queryset\n	def post(self,request,*args,**kwargs):\n		formset=VariationInventoryFormSet(request.POST,request.FILES)\n		print (request.POST)\n		if formset.is_valid():\n			formset.save(commit=False)\n			for form in formset:\n				new_ietm=form.save(commit=False)\n				if new_ietm.title:\n					product_pk=self.kwargs.get(\"pk\")\n					product=get_object_or_404(Product,pk=product_pk)\n					new_ietm.product=product\n					new_ietm.save() \n			messages.success(request,\"updated successful\")\n			return redirect(\"products\")\n		raise Http404\n\n#--------------------------------------------------------------\n#Class based view and function based view below\n\nclass ProductListView(ListView):\n	model=Product\n	queryset=Product.objects.all()\n	def get_context_data(self,*args,**kwargs):\n		context=super(ProductListView,self).get_context_data(*args,**kwargs)\n		print (context)\n		return context\n	def get_queryset(self,*args,**kwargs):\n		qs=super(ProductListView,self).get_queryset(*args,**kwargs)\n		query=self.request.GET.get(\"q\")\n		if query:\n			qs=self.model.objects.filter(\n				Q(title__icontains=query) |\n				Q(description__icontains=query)\n				)\n\n		return qs\n\n\nclass ProductDetailView(DetailView):\n	model=Product\n\n\ndef product_details_view_func(request,id):\n	# product_instance=Product.objects.get(id=id)\n	product_instance=get_object_or_404(Product,id=id)\n	try:\n		product_instance=Product.objects.get(id=id)\n	except Product.DoesNotExist:\n		raise Http404\n	except:\n		raise Http404\n	template=\"products/product_detail.html\"\n	context={\n			\"object\":product_instance\n\n	}\n\n	return render(request,template,context)\n#--------------------------------------------------------------",
+			"file": "src/products/views.py",
+			"file_size": 2686,
+			"file_write_time": 130870513382291021,
+			"settings":
+			{
+				"buffer_size": 2730,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/static_in_pro/our_static/css/custom.css",
+			"settings":
+			{
+				"buffer_size": 101,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/products/templates/products/product_detail.html",
+			"settings":
+			{
+				"buffer_size": 1952,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/templates/base.html",
+			"settings":
+			{
+				"buffer_size": 1330,
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+		[
+			[
+				[
+					"Packages/Python/Python.sublime-build",
+					""
+				],
+				[
+					"Packages/Python/Python.sublime-build",
+					"Syntax Check"
+				]
+			],
+			[
+				"Packages/Python/Python.sublime-build",
+				""
+			]
+		]
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/ecommerce2",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/static_in_pro/our_static",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/static_in_pro/our_static/css",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/static_in_env"
+	],
+	"file_history":
+	[
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/ecommerce2/urls.py",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/products/urls.py",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/templates/javascript.html",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/products/admin.py",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/products/views.py",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/products/templates/products/product_detail.html",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/templates/base.html",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/templates/navbar.html",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/products/mixins.py",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/ecommerce2/views.py",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/products/templates/products/product_list.html",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/ecommerce2/settings/local.py",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/.gitignore",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/manage.py",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/trydjango18/old_settings.py",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/trydjango18/settings/base.py",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/trydjango18/settings/local.py",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/trydjango18/settings/production.py",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/trydjango18/urls.py",
+		"/C/Users/T_AbhijitB1/workspace/ecommerce-2/src/trydjango18/wsgi.py",
+		"/C/Users/T_AbhijitB1/workspace/gym1/dashboard/views.py",
+		"/C/Users/T_AbhijitB1/workspace/gym1/templates/login.html",
+		"/C/Users/T_AbhijitB1/workspace/gym1/dashboard/form.py",
+		"/C/Users/T_AbhijitB1/workspace/gym1/templates/index.html",
+		"/C/Users/T_AbhijitB1/workspace/gym1/templates/register_member.html",
+		"/C/Users/T_AbhijitB1/workspace/gym1/templates/base.html",
+		"/C/Users/T_AbhijitB1/workspace/gym1/dashboard/models.py",
+		"/C/Users/T_AbhijitB1/workspace/gym1/gym1/urls.py",
+		"/C/Users/T_AbhijitB1/workspace/gym1/templates/plans.html",
+		"/C/Users/T_AbhijitB1/workspace/gym1/dashboard/admin.py",
+		"/C/Users/T_AbhijitB1/workspace/gym1/gym1/settings.py",
+		"/C/Users/T_AbhijitB1/workspace/gym1/templates/forms_general.html",
+		"/C/Users/T_AbhijitB1/workspace/gym1/templates/forms_validation.html",
+		"/C/Users/T_AbhijitB1/workspace/gym1/templates/dashboard-base.html",
+		"/C/Users/T_AbhijitB1/workspace/srvup/src/videos/views.py",
+		"/C/Users/T_AbhijitB1/workspace/srvup/src/srvup/urls.py",
+		"/C/Users/T_AbhijitB1/workspace/srvup/src/srvup/views.py",
+		"/C/Users/T_AbhijitB1/workspace/srvup/src/videos/models.py",
+		"/C/Users/T_AbhijitB1/workspace/srvup/src/srvup/templates/home.html",
+		"/C/Users/T_AbhijitB1/workspace/srvup/src/srvup/templates/videos/video_list.html",
+		"/C/Users/T_AbhijitB1/workspace/srvup/src/srvup/templates/videos/video_detail.html",
+		"/C/Users/T_AbhijitB1/workspace/srvup/src/srvup/templates/base.html",
+		"/C/Users/T_AbhijitB1/workspace/srvup/src/srvup/settings.py",
+		"/C/Users/T_AbhijitB1/workspace/srvup/src/srvup/forms.py",
+		"/C/Users/T_AbhijitB1/workspace/drf/src/accounts/views.py",
+		"/C/Users/T_AbhijitB1/workspace/drf/src/videos/models.py",
+		"/C/Users/T_AbhijitB1/workspace/drf/src/accounts/models.py",
+		"/C/Users/T_AbhijitB1/workspace/drf/src/videos/forms.py",
+		"/C/Users/T_AbhijitB1/workspace/drf/src/videos/views.py",
+		"/C/Users/T_AbhijitB1/workspace/drf/src/srvup/views.py",
+		"/C/Users/T_AbhijitB1/workspace/drf/src/analytics/views.py",
+		"/C/Users/T_AbhijitB1/workspace/drf/src/billing/views.py",
+		"/C/Users/T_AbhijitB1/workspace/drf/src/comments/views.py",
+		"/C/Users/T_AbhijitB1/workspace/drf/src/srvup/wsgi.py",
+		"/C/Users/T_AbhijitB1/workspace/drf/src/notifications/views.py",
+		"/C/Users/T_AbhijitB1/workspace/drf/src/templates/navbar.html",
+		"/C/Users/T_AbhijitB1/workspace/drf/src/notifications/models.py",
+		"/C/Users/T_AbhijitB1/workspace/drf/src/analytics/models.py",
+		"/C/Users/T_AbhijitB1/Dropbox/flask_project/flask_project/fapp1/app.py",
+		"/C/Users/T_AbhijitB1/workspace/pysa/pysa/urls.py",
+		"/C/Users/T_AbhijitB1/workspace/pysa/pysa/settings.py",
+		"/C/Users/T_AbhijitB1/Desktop/test.py",
+		"/C/Users/T_AbhijitB1/workspace/flask_project/fapp1/templates/updated",
+		"/C/Users/T_AbhijitB1/workspace/flask_project/fapp1/sql.py",
+		"/C/Users/T_AbhijitB1/Desktop/test.c",
+		"/C/Users/T_AbhijitB1/workspace/trydjango18/trydjango18/static_in_pro/our_static/img/example.txt",
+		"/C/Users/T_AbhijitB1/workspace/trydjango18/trydjango18/newsletter/admin.py",
+		"/C/Users/T_AbhijitB1/workspace/project2/GUI/KIOSK_simulator.py",
+		"/C/Users/T_AbhijitB1/workspace/trydjango18/trydjango18/trydjango18/urls.py",
+		"/C/Users/T_AbhijitB1/workspace/trydjango18/trydjango18/newsletter/views.py",
+		"/C/Users/T_AbhijitB1/workspace/trydjango18/trydjango18/templates/forms.html",
+		"/C/Users/T_AbhijitB1/workspace/trydjango18/trydjango18/templates/home.html",
+		"/C/Users/T_AbhijitB1/workspace/trydjango18/trydjango18/trydjango18/settings.py",
+		"/C/Users/T_AbhijitB1/workspace/trydjango18/trydjango18/newsletter/forms.py",
+		"/C/Users/T_AbhijitB1/workspace/djallauth/djs/db.sqlite3",
+		"/C/Users/T_AbhijitB1/workspace/matchmaker/profiles/views.py",
+		"/C/Users/T_AbhijitB1/workspace/matchmaker/static/templates/single_user.html",
+		"/C/Users/T_AbhijitB1/workspace/matchmaker/profiles/admin.py",
+		"/C/Users/T_AbhijitB1/workspace/matchmaker/static/templates/all.html",
+		"/C/Users/T_AbhijitB1/workspace/matchmaker/matchmaker/urls.py",
+		"/C/Users/T_AbhijitB1/workspace/matchmaker/matchmaker/wsgi.py",
+		"/C/Users/T_AbhijitB1/workspace/matchmaker/static/templates/home.html",
+		"/C/Users/T_AbhijitB1/workspace/matchmaker/matchmaker/settings/local.py",
+		"/C/Users/T_AbhijitB1/workspace/matchmaker/manage.py",
+		"/C/Users/T_AbhijitB1/workspace/matchmaker/matchmaker/settings/__init__.py",
+		"/C/Abhijit/Python34/Scripts/django-admin.py",
+		"/C/Users/T_AbhijitB1/workspace/app1/myauth/views.py",
+		"/C/Users/T_AbhijitB1/workspace/app1/app1/settings.py",
+		"/C/Users/T_AbhijitB1/workspace/app1/contact/models.py",
+		"/C/Users/T_AbhijitB1/workspace/app1/static/templates/home.html",
+		"/C/Users/T_AbhijitB1/workspace/theapp/dashboard/forms.py",
+		"/C/Users/T_AbhijitB1/workspace/theapp/dashboard/views.py",
+		"/C/Users/T_AbhijitB1/workspace/theapp/superadmin/models.py",
+		"/C/Users/T_AbhijitB1/workspace/app1/contact/forms.py",
+		"/C/Users/T_AbhijitB1/workspace/theapp/superadmin/views.py",
+		"/C/Users/T_AbhijitB1/workspace/app1/manage.py",
+		"/C/Users/T_AbhijitB1/workspace/app1/app1/urls.py",
+		"/C/Users/T_AbhijitB1/workspace/app1/myauth/forms.py",
+		"/C/Users/T_AbhijitB1/workspace/app1/static/templates/form.html",
+		"/C/Users/T_AbhijitB1/workspace/app1/myauth/models.py",
+		"/C/Users/T_AbhijitB1/workspace/app1/app1/forms.py"
+	],
+	"find":
+	{
+		"height": 34.0
+	},
+	"find_in_files":
+	{
+		"height": 90.0,
+		"where_history":
+		[
+			"C:\\Users\\T_AbhijitB1\\workspace\\ecommerce-2\\src"
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"sale-",
+			"content",
+			"urls.py",
+			"trydjango18",
+			"forms",
+			"form",
+			"chat",
+			"dashb",
+			"base",
+			"regist",
+			"form",
+			"dashb",
+			"admin",
+			"gener",
+			"genera",
+			"prod",
+			"href",
+			"video.C",
+			"rest",
+			"rest_",
+			">\n",
+			"forms.html",
+			"SITE_ID",
+			"login",
+			"name",
+			".name",
+			"()\n"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"ecommerce2"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 4,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "src/products/models.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2791,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								753,
+								753
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage"
+						},
+						"translation.x": 42.0,
+						"translation.y": 225.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "src/products/admin.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 249,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								248,
+								248
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/products/urls_category.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 344,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								341,
+								341
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "src/products/urls.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 658,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "src/products/views.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2730,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								565,
+								565
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": -0.0,
+						"translation.y": 45.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "src/static_in_pro/our_static/css/custom.css",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 101,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								101,
+								101
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CSS/CSS.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "src/products/templates/products/product_detail.html",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1952,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								475,
+								475
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "src/templates/base.html",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1330,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1102,
+								1102
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 450.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 23.0
+	},
+	"input":
+	{
+		"height": 31.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 274.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "Packages/Python/Python.sublime-build",
+	"project": "ecommerce2.sublime-project",
+	"replace":
+	{
+		"height": 42.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 161.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

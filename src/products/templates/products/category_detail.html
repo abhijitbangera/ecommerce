@@ -1,0 +1,30 @@
+{% extends "base.html "%}
+
+{% block content %}
+<h3>{{object}}</h3>
+{% for product in products %}
+<div class="col-xs-4">
+    <div class="thumbnail text-center">
+        <h4><a href='{{product.get_absolute_url}}'>{{product.title}}</a><br/></h4>
+      {% if product.productimage_set.count > 0 %}
+          {% for img in product.productimage_set.all %}
+           <a href='{{product.get_absolute_url}}'><img class='img-responsive' src='{{img.image.url}}' /></a>
+          {% endfor %}
+    </div>
+  </div>
+      {% endif %}  
+{% cycle  '' ''  '</div><div class="row">'%} 
+
+
+{% endfor %}
+
+
+
+<table class='table'>
+{% for product in object.product_set.all %}
+<tr>
+<td><a href='{{product.get_absolute_url}}'>{{product.title}}</a></td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}
