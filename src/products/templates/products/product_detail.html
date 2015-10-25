@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 
+
 <script >
     {% block jquery %}
     function setPrice(){
@@ -20,11 +21,44 @@
 
     	setPrice()
     })
+
+
+
+// Ajax add to cart
+
+    $("#submit-btn").click(function(event){
+      event.preventDefault();
+      var formData= $("#add-form").serialize();
+      // alert(formData)
+      console.log();
+      $.ajax({
+        type: "GET",
+        url: "{% url 'cart' %}",
+        data: formData,
+        success: function(data) {
+          // $("#jquery-message").text("Added "+ data.item_added + " Deleted "+ data.deleted)
+          // showFlashMessage("Product added successfully.")
+          showFlashMessage(data.flash_message);
+          updateCartItemCount();
+
+        },
+        error:function(response, error){
+          // console.log(response)
+          // console.log(error)
+          $("#add-form").submit()
+        }
+      })
+
+    })
+
     {% endblock %}
 </script>  
 
 
 {% block content %}
+
+
+
 <div class='row'>
 
 <div class='col-sm-8'>
@@ -44,7 +78,10 @@
 <!-- Product Sidebar -->
 <div class='col-sm-4'>
 
-<form method='GET' action="{% url 'cart' %}">
+<form id='add-form' method='GET' action="{% url 'cart' %}">
+<p id='jquery-message' class='lead'>
+
+</p>
   {% if object.variation_set.count > 1 %}
   <h3 id='price'>{{ object.variation_set.first.price}}</h3>
 
@@ -65,7 +102,7 @@
   {% endif %}
   <input class='form-control' type='number' name='qty' value='1'/>
   <br/>
-  <input type='submit' value='Add to cart' class='btn btn-default'>
+  <input id='submit-btn' type='submit' value='Add to cart' class='btn btn-default'>
 </form>
 
 <br/>
